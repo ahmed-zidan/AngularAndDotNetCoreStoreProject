@@ -1,15 +1,16 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
+using WebApi.Data;
+using WebApi.Data.Repo;
+using WebApi.Helpers;
+using WebApi.Interfaces;
 
 namespace WebApi
 {
@@ -26,6 +27,14 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddCors();
+            services.AddDbContext<MyDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString(
+                "HouseStoreDb")));
+            services.AddScoped<IUnitOFWork, UnitOfWork>();
+            services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+
+            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,9 +46,9 @@ namespace WebApi
             }
 
             app.UseHttpsRedirection();
-
+            
             app.UseRouting();
-
+            app.UseCors(m => m.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
