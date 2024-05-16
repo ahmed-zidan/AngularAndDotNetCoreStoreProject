@@ -13,6 +13,7 @@ namespace WebApi.Helpers
         public AutoMapperProfile()
         {
             CreateMap<City, CityDto>().ReverseMap();
+            CreateMap<City, CityUpdateDto>().ReverseMap();
         }
     }
 }

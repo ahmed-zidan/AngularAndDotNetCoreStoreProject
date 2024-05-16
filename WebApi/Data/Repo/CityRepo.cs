@@ -40,6 +40,10 @@ namespace WebApi.Data.Repo
             return await _myContext.Cities.ToListAsync();
         }
 
-       
+        public void Update(City city)
+        {
+            _myContext.Cities.Update(city);
+            
+        }
     }
 }

@@ -25,6 +25,7 @@ namespace WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
+            throw new UnauthorizedAccessException();
             var cities =  await _uow.cityRepo.GetCitiesAsync();
             var citiesDto = _mapper.Map<List<CityDto>>(cities); 
             return Ok(citiesDto);
@@ -87,6 +88,43 @@ namespace WebApi.Controllers
                 return Ok(id);
             }
 
+        }
+        
+        //put api/city/update
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult>UpdateAsync(int id,CityDto city)
+        {
+            if(id != city.Id)
+            {
+                return BadRequest("update is not allowed");
+            }
+            var c = await _uow.cityRepo.FindAsync(id);
+            if (c == null)
+            {
+                return BadRequest("update is not allowed");
+            }
+            c.LastUpdated = DateTime.Now;
+            c.LastUpdatedBy = 1;
+            _mapper.Map(city , c);
+          //  _uow.cityRepo.Update(c);
+            await _uow.SaveAsync();
+            return StatusCode(201);
+        }
+        //put api/city/update
+        [HttpPut("updateCityName/{id}")]
+        public async Task<IActionResult> UpdateAsync(int id, CityUpdateDto city)
+        {
+            var c = await _uow.cityRepo.FindAsync(id);
+            if(c == null)
+            {
+                return BadRequest("update is not allowed");
+            }
+            c.LastUpdated = DateTime.Now;
+            c.LastUpdatedBy = 1;
+            _mapper.Map(city, c);
+            //  _uow.cityRepo.Update(c);
+            await _uow.SaveAsync();
+            return StatusCode(201);
         }
     }
 }

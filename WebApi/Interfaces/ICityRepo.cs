@@ -13,6 +13,7 @@ namespace WebApi.Interfaces
         Task AddCityAsync(City city);
         Task<bool> Exists(string name);
         Task<City> FindAsync(int id);
+        void Update(City city);
       
     }
 }
