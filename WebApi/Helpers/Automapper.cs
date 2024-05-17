@@ -14,6 +14,7 @@ namespace WebApi.Helpers
         {
             CreateMap<City, CityDto>().ReverseMap();
             CreateMap<City, CityUpdateDto>().ReverseMap();
+            CreateMap<User, UserLogin>().ReverseMap();
         }
     }
 }

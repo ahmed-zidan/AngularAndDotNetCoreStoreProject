@@ -14,6 +14,7 @@ namespace WebApi.Data.Repo
             _db = db;
         }
         public ICityRepo cityRepo => new CityRepo(_db);
+        public IUserRepo userRepo => new UserRepo(_db);
 
         public async Task<bool> SaveAsync()
         {
