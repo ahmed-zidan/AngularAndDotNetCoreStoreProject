@@ -10,9 +10,8 @@ using WebApi.Models;
 
 namespace WebApi.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CityController : ControllerBase
+    
+    public class CityController :BaseController
     {
         private readonly IUnitOFWork _uow;
         private readonly IMapper _mapper;
