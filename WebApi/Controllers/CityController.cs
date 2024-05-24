@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using WebApi.Models;
 namespace WebApi.Controllers
 {
     
+    [Authorize]
     public class CityController :BaseController
     {
         private readonly IUnitOFWork _uow;
@@ -22,6 +24,7 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAsync()
         {
             var cities =  await _uow.cityRepo.GetCitiesAsync();

@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -7,7 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using System.Net;
+using System.Text;
 using WebApi.Data;
 using WebApi.Data.Repo;
 using WebApi.Extensions;
@@ -33,6 +36,21 @@ namespace WebApi
             services.AddCors();
             services.AddDbContext<MyDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString(
                 "HouseStoreDb")));
+            var secretKey = Configuration.GetSection("AppSetting:Key").Value;
+            var key = new SymmetricSecurityKey(Encoding.UTF8
+                .GetBytes(secretKey));
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(op =>
+                {
+                    op.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+                    {
+                        ValidateIssuerSigningKey = true,
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        IssuerSigningKey = key
+                    };
+                });
             services.AddScoped<IUnitOFWork, UnitOfWork>();
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
@@ -49,6 +67,7 @@ namespace WebApi
             
             app.UseRouting();
             app.UseCors(m => m.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

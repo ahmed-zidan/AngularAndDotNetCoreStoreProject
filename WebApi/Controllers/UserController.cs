@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -21,59 +23,68 @@ namespace WebApi.Controllers
     {
         private readonly IUnitOFWork _uow;
         private readonly IMapper _mapper;
-        public UserController(IUnitOFWork uow , IMapper mapper)
+        private readonly IConfiguration _configuration;
+        public UserController(IUnitOFWork uow , IMapper mapper,IConfiguration configuration)
         {
             _uow = uow;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
         //post api/user/login
         [HttpPost("login")]
         public async Task<IActionResult> login(UserLogin userDto)
         {
-            
-           var user = await _uow.userRepo.Authenticate(userDto.Name , userDto.Password);
-            if(user == null)
+
+            var user = await _uow.userRepo.Authenticate(userDto.Name, userDto.Password);
+            if (user == null)
             {
                 return Unauthorized();
             }
             else
             {
+                var token = GenerateToken(user);
+
                 UserLoginResDto res = new UserLoginResDto()
                 {
                     Name = user.Name,
-                    Token = "token res"
+                    expired = token.ValidTo,
+                    Token = new JwtSecurityTokenHandler().WriteToken(token)
                 };
                 return Ok(res);
             }
         }
 
-        private string GenerateToken(User user)
-        {
-            var key = new SymmetricSecurityKey(Encoding.UTF8
-                .GetBytes("key"));
-
-            var claims = new Claim[]
+            private SecurityToken GenerateToken(User user)
             {
+            var secretKey = _configuration.GetSection("AppSetting:Key").Value;
+            var key = new SymmetricSecurityKey(Encoding.UTF8
+                    .GetBytes("shh.. keyjsdfjs sfjsk sdj"));
+
+                var claims = new Claim[]
+                {
                  new Claim(ClaimTypes.Name,user.Name),
                  new Claim(ClaimTypes.NameIdentifier,user.Id.ToString())
-            };
+                };
 
-            var signingCredintiels = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature
-                );
+                var signingCredintiels = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature
+                    );
 
-            var tokenDescription = new SecurityTokenDescriptor()
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(1),
-                SigningCredentials = signingCredintiels,
+                var tokenDescription = new SecurityTokenDescriptor()
+                {
+                    Subject = new ClaimsIdentity(claims),
+                    Expires = DateTime.Now.AddMinutes(1),
+                    SigningCredentials = signingCredintiels,
 
-            };
+                };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescription);
-            return tokenHandler.WriteToken(token);
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.CreateToken(tokenDescription);
+                return token;
+
+            }
 
         }
+       
     }
-}
+

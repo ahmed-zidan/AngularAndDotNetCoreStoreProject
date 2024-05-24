@@ -8,6 +8,8 @@ namespace WebApi.Dtos
     public class UserLoginResDto
     {
         public string Name { get; set; }
+        public DateTime expired { get; set; }
+
         public string Token { get; set; }
     }
 }
