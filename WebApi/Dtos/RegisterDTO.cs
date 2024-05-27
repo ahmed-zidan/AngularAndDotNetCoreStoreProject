@@ -4,17 +4,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebApi.Models
+namespace WebApi.Dtos
 {
-    public class User
+    public class RegisterDTO
     {
-        public int Id { get; set; }
         [Required]
-        
         public string Name { get; set; }
         [Required]
-        public byte[] Password { get; set; }
-        public byte[] PasswordKey { get; set; }
-        
+
+        public string Password { get; set; }
     }
 }

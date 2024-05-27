@@ -13,6 +13,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using WebApi.Dtos;
+using WebApi.Errors;
 using WebApi.Interfaces;
 using WebApi.Models;
 
@@ -31,15 +32,41 @@ namespace WebApi.Controllers
             _configuration = configuration;
         }
 
+
+        [HttpPost("Register")]
+        public async Task<IActionResult> RegisterAsync(RegisterDTO model)
+        {
+            ApiError apiError = new ApiError();
+            if (!ModelState.IsValid)
+            {
+                apiError.ErrorMessage = "model is not correct";
+                apiError.StatusCode = 500;
+                return BadRequest(apiError);
+            }
+            if (await _uow.userRepo.IsExist(model.Name))
+            {
+                apiError.ErrorMessage = "user already exist";
+                apiError.StatusCode = 400;
+                return BadRequest(apiError);
+            }
+
+            await _uow.userRepo.Register(model.Name , model.Password);
+            await _uow.SaveAsync();
+            return StatusCode(201);
+
+        }
+
         //post api/user/login
         [HttpPost("login")]
         public async Task<IActionResult> login(UserLogin userDto)
         {
-
+            var apiError = new ApiError();
             var user = await _uow.userRepo.Authenticate(userDto.Name, userDto.Password);
             if (user == null)
             {
-                return Unauthorized();
+                apiError.ErrorMessage = "Invalid user ID Or Password";
+                apiError.StatusCode = 401;
+                return Unauthorized(apiError);
             }
             else
             {

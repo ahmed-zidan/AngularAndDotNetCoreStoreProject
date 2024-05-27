@@ -8,6 +8,10 @@ namespace WebApi.Errors
 {
     public class ApiError
     {
+        public ApiError()
+        {
+
+        }
         public ApiError(int statusCode, string errorMessage, string messageDetail = null)
         {
             StatusCode = statusCode;
@@ -21,7 +25,11 @@ namespace WebApi.Errors
 
         public override string ToString()
         {
-            return JsonSerializer.Serialize(this);
+            JsonSerializerOptions opt = new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+            return JsonSerializer.Serialize(this, opt);
         }
     }
 }

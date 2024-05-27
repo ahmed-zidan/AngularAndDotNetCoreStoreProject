@@ -22,11 +22,7 @@ namespace WebApi.Data
                 new City() { Id = 4, Name = "Giza" }
                 );
 
-            modelBuilder.Entity<User>().HasData(
-                new User() { Id = 1, Name = "aaa", Password = "123" },
-                new User() { Id = 2, Name = "bbb", Password = "456" },
-                new User() { Id = 3, Name = "ccc", Password = "789" }
-                );
+            
         }
         public DbSet<City> Cities{ get; set; }
         public DbSet<User> Users{ get; set; }

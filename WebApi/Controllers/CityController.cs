@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApi.Dtos;
+using WebApi.Errors;
 using WebApi.Interfaces;
 using WebApi.Models;
 
@@ -38,7 +39,8 @@ namespace WebApi.Controllers
 
         public async Task<IActionResult> PostAsync(string cityName)
         {
-            if(!string.IsNullOrEmpty(cityName) && 
+            var apiError = new ApiError();
+            if (!string.IsNullOrEmpty(cityName) && 
                 !await _uow.cityRepo.Exists(cityName))
             {
                 City city = new City() { Name = cityName };
@@ -48,7 +50,9 @@ namespace WebApi.Controllers
             }
             else
             {
-                return StatusCode(300);
+                apiError.ErrorMessage = "Name is not valid";
+                apiError.StatusCode = 300;
+                return BadRequest(apiError);
             }
             
         }
@@ -57,6 +61,7 @@ namespace WebApi.Controllers
         [HttpPost("post")]
         public async Task<IActionResult> PostAsync(CityDto city)
         {
+            var apiError = new ApiError();
             if (city!=null &&!string.IsNullOrEmpty(city.Name) &&
                 !await _uow.cityRepo.Exists(city.Name))
             {
@@ -68,7 +73,10 @@ namespace WebApi.Controllers
             }
             else
             {
-                return StatusCode(300);
+                apiError.ErrorMessage = "City name is not valid";
+                apiError.StatusCode = 300;
+                return BadRequest(apiError);
+               
             }
 
         }
@@ -77,9 +85,12 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
+            var apiError = new ApiError();
             City city = await _uow.cityRepo.FindAsync(id);
             if(city == null)
             {
+                apiError.ErrorMessage = "city is not found";
+                apiError.StatusCode = 404;
                 return NotFound();
             }
             else
@@ -95,14 +106,19 @@ namespace WebApi.Controllers
         [HttpPut("update/{id}")]
         public async Task<IActionResult>UpdateAsync(int id,CityDto city)
         {
-            if(id != city.Id)
+            var apiError = new ApiError();
+            if (id != city.Id)
             {
-                return BadRequest("update is not allowed");
+                apiError.ErrorMessage = "update is not allowed";
+                apiError.StatusCode = 400;
+                return BadRequest(apiError);
             }
             var c = await _uow.cityRepo.FindAsync(id);
             if (c == null)
             {
-                return BadRequest("update is not allowed");
+                apiError.ErrorMessage = "update is not allowed";
+                apiError.StatusCode = 400;
+                return BadRequest(apiError);
             }
             c.LastUpdated = DateTime.Now;
             c.LastUpdatedBy = 1;
@@ -115,10 +131,13 @@ namespace WebApi.Controllers
         [HttpPut("updateCityName/{id}")]
         public async Task<IActionResult> UpdateAsync(int id, CityUpdateDto city)
         {
+            var apiError = new ApiError();
             var c = await _uow.cityRepo.FindAsync(id);
             if(c == null)
             {
-                return BadRequest("update is not allowed");
+                apiError.ErrorMessage = "update is not allowed";
+                apiError.StatusCode = 400;
+                return BadRequest(apiError);
             }
             c.LastUpdated = DateTime.Now;
             c.LastUpdatedBy = 1;
